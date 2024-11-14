@@ -1,0 +1,8 @@
+body {
+  background-color: #fdf2e9;
+}
+
+input[type="email"],
+input[type="password"] {
+  background-color: #fdf2e9;
+}
