@@ -1,6 +1,7 @@
 <?php
 
 include "DatabaseConnection.php";
+include "check_password_violated.php";
 
 function login($database,$email,$password){
     $sql = "SELECT * FROM `users` WHERE `email` = :email";
@@ -10,8 +11,9 @@ function login($database,$email,$password){
     $stmt->execute($values);
     $user = $stmt->fetch();
     if($user && password_verify($password,$user['password'])){
+        $is_violated = check_password_violated($password);
+        return ['user' => $user, 'is_violated' => $is_violated];
         
-        return $user;
     } else {
         $error = 'Email o password errati';
         return $error;
@@ -19,27 +21,9 @@ function login($database,$email,$password){
 }
 
 function register($database,$email,$password,$check_password){
-    //Check password se non è stata violata:
-
-    //Sha-1 password
-    $sha_1 = sha1($password);
-
-    //Api i have been pwned
-    $api = 'https://api.pwnedpasswords.com/range/';
-
-    //Concateno url
-
-    $first_part = strtoupper(substr($sha_1, 0, 5));
-    $second_part = strtoupper(substr($sha_1, 5));
-
-    $url = $api . $first_part;
-
-
-    $response = file_get_contents($url);
-
     
 
-    if(str_contains($response, $second_part)){
+    if(check_password_violated($password)){
         return $error = "Password violata, perfavore prova un'altra password!";
     }
 
@@ -69,10 +53,23 @@ function register($database,$email,$password,$check_password){
             $user->execute([':email' => $email]);
             $user = $user->fetch();
 
-            return $user;
+            return ['user' => $user , 'is_violated' => False];
         } else {
             return "Le password non coincidono";
         }
         
     }
+}
+
+function change_password($database,$password,$id){
+    if(check_password_violated($password)){
+        return $error = "La password è violata, perfavore riprova con un'altra password!";
+    }
+    $password = password_hash($password, PASSWORD_DEFAULT);
+    $sql = 'UPDATE `users` SET `password` = :password WHERE `id_user` = :id';
+    $stmt = $database->prepare($sql);
+    $values = ['id' => $id,'password' => $password];
+    $stmt->execute($values);
+
+    //return $_SESSION['is_violated'] = False;
 }

@@ -9,13 +9,22 @@
 </head>
 <body>
     
+    <header class="container d-flex justify-content-center">
+        <h1>Test Register</h1>
+    </header>
 
+    <?php if(isset($error)):?>
+        <div class='container alert alert-danger mt-2'><?=$error?></div>
+    <?php endif?>
+
+    <?php if(isset($message)):?>
+        <div class='container alert alert-success mt-2'><?=$error?></div>
+    <?php endif?>
     
 
     <main class="container">
         <div class="row d-flex justify-content-center p-5">
             <div class="col-12 col-md-10 justify-content-center align-items-center flex-column border p-3">
-                <h1>Test Register</h1>
                 <?php echo $output ?>
             </div>
         </div>
